@@ -1,0 +1,33 @@
+services:
+  # Serviço do Banco de Dados
+  db:
+    image: postgres:15-alpine
+    container_name: banco_postgres
+    platform: linux/arm64
+    restart: always
+    environment:
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_NAME=meubanco
+    ports:
+      - "5434:5432" # [PC : Container] -> Você acessa do seu PC pela 5434
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço do seu App Ktor
+  app:
+    build: .
+    container_name: ktor_poc
+    platform: linux/arm64
+    ports:
+      - "8080:8080"
+    environment:
+      # Usa o nome do serviço 'db' e a porta interna '5432'
+      - DB_URL=jdbc:postgresql://db:5432/meubanco
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
